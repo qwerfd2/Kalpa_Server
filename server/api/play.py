@@ -465,8 +465,7 @@ async def api_play_end(request: Request):
             col_name = "totalCntClear" + DIFF_TABLE[start_obj['mode']]
 
         update_query = (
-            userPublicProfiles
-            .update()
+            userPublicProfiles.update()
             .where(userPublicProfiles.c.UserPk == user['pk'])
             .values({col_name: userPublicProfiles.c[col_name] + 1})
         )

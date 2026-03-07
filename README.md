@@ -124,6 +124,14 @@ I will not be able to provide help or otherwise elaborate on the subject.
 
 ## Note:
 
+### Rating implementation:
+
+B50, no recent.
+
+Formula derived from old PC version (prior to the big update, new update/pc server uses a different formula)
+
+### Other things
+
 A couple interesting things to look into:
 
 The manifest contains unused songs and charts

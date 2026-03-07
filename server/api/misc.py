@@ -94,7 +94,7 @@ async def get_b64(userPK, user_profile):
     user_lab_missions = [dict(row) for row in await get_user_lab_missions(userPK)]
     best_records = [dict(row) for row in await get_best_records(userPK, 0)]
     lunatic_best_records = [dict(row) for row in await get_best_records(userPK, 1)]
-    darkarea_best_records = await get_darkarea_best_records(userPK)
+    # darkarea_best_records = await get_darkarea_best_records(userPK)
     user_noah_chapters = [dict(row) for row in await get_user_noah_chapters(userPK)]
     user_noah_parts = [dict(row) for row in await get_user_noah_parts(userPK)]
     user_noah_stages = [dict(row) for row in await get_user_noah_stages(userPK)]
