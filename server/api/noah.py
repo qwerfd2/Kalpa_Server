@@ -55,7 +55,6 @@ async def noah_chapter_unlock(request: Request):
             await update_user_noah_chapters(user['pk'], 2, user_noah_chapter['order'], user_noah_chapter['currents'], chapter_pk)
             user_noah_chapter = await get_user_noah_chapters(user['pk'], 1)
 
-
             # update_user_noah_parts(user_pk: int, state: int, order: int, noah_part_pk: int):
             noah_part = await get_user_noah_parts(user['pk'], 1)
             await update_user_noah_parts(user['pk'], 1, noah_part['order'], 1)
@@ -153,7 +152,6 @@ async def noah_part_complete(request: Request):
                 else:
                     # reached the end
                     user_noah_stage = []
-
                     user_profile_query = userProfiles.update().where(userProfiles.c.UserPk == user['pk']).values(
                         onProgressNoahStagePkOrZero = 0
                     )
@@ -185,7 +183,6 @@ async def noah_part_complete(request: Request):
                     "changedUserNoahChapters": noah_chapter
                 }
 
-
     response_data, completed_ach = await get_standard_response(user, user_profile, item_queue)
     response_data['message'] = message
     response_data['data'] = data
@@ -196,7 +193,6 @@ async def noah_part_complete(request: Request):
 
     response_data = convert_datetime(response_data)
     return JSONResponse(response_data, status_code=status)
-
     
 async def noah_stage_recall(request: Request):
     user, user_profile, error = await get_user_and_validate_session(request)

@@ -18,6 +18,7 @@ async def load_attendence_roster():
 async def reset_attendence_roster():
     global ATTENDENCE_ROSTER, ATTENDENCE_COUNT
     ATTENDENCE_ROSTER = {}
+    ATTENDENCE_COUNT = int(time.time() // 86400)
     with open("api/config/attendence_roster.json", "w") as f:
         json.dump({"attendence_count": ATTENDENCE_COUNT, "data": ATTENDENCE_ROSTER}, f)
 
