@@ -303,8 +303,6 @@ async def get_user_mission(user_pk: int, post_processing: bool = False):
     if post_processing:
         for mission in updated_missions:
             mission['remainingTime'] = mission['expireDate'] - current_time
-            del mission['createdAt']
-            del mission['updatedAt']
 
     return updated_missions
 
@@ -631,6 +629,7 @@ async def create_user(user_name: str, password: str, device_identifier: str):
         isLocal=1,
         isGoogle=0,
         isGamecenter=0,
+        cosmicSymphonyStoryIndex=0,
         state=0,
         lastActiveDate = datetime.utcnow(),
         currentToken=token_id,

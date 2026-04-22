@@ -147,7 +147,7 @@ async def api_play_start(request: Request):
                     json_data['data'] = {}
                     return JSONResponse(json_data, status_code=400)
     
-    if play_type == 13:
+    elif play_type == 13:
         # do darkmoon specific astral melody deduct
         temp_item_queue = {}
         temp_item_queue['map.' + str(map_id)] = -1
@@ -197,16 +197,18 @@ async def api_play_start(request: Request):
             return JSONResponse(json_data, status_code=400)
     else:
         # normal free play boosting (noah cannot boost)
-        astral_boost_config = ASTRAL_BOOSTS[astral_boost_step]
-        astral_boost_cost = astral_boost_config['cost']
-        if astral_boost_cost > 0:
-            item_queue["astralmelody"] = item_queue.get("astralmelody", 0) - astral_boost_cost
-            can_pay = await check_item_entitlement(user['pk'], item_queue)
-            if not can_pay:
-                json_data, completed_ach = await get_standard_response(user, user_profile)
-                json_data['message'] = "Not enough astral melody to use Astral Boost."
-                json_data['data'] = {}
-                return JSONResponse(json_data, status_code=400)
+        if pack_id not in [39, 50]:
+            # Not april fools
+            astral_boost_config = ASTRAL_BOOSTS[astral_boost_step]
+            astral_boost_cost = astral_boost_config['cost']
+            if astral_boost_cost > 0:
+                item_queue["astralmelody"] = item_queue.get("astralmelody", 0) - astral_boost_cost
+                can_pay = await check_item_entitlement(user['pk'], item_queue)
+                if not can_pay:
+                    json_data, completed_ach = await get_standard_response(user, user_profile)
+                    json_data['message'] = "Not enough astral melody to use Astral Boost."
+                    json_data['data'] = {}
+                    return JSONResponse(json_data, status_code=400)
 
     data = await start_game(user_profile, play_type, mode, note_mode, play_mode, lunatic_mode, pack_id, track_id, map_id, event_type, event_pk, astral_boost_step, user)
 
@@ -436,10 +438,10 @@ async def api_play_end(request: Request):
                                 endAt = end_at
                             )
                             await player_database.execute(update_query) 
-        else:
+        elif start_obj['packID'] not in [39, 50]:
+            # Not april fools song, give free play rewards
             low_bound = int(450 * astral_boost_config['playRewardMultiplier'])
             high_bound = int(550 * astral_boost_config['playRewardMultiplier'])
-            # astral boost implementation
             reward_list['energy.green'] = random.randint(low_bound, high_bound)
             reward_list['darkmatter'] = round(1 * astral_boost_config['playRewardMultiplier'])
 
@@ -450,7 +452,10 @@ async def api_play_end(request: Request):
 
         map_info = await get_map(start_obj['mapID'])
         if map_info:
-            rating = single_rating(map_info['difficulty'], play_data['rate'], start_obj['lunaticMode'])
+            if start_obj['packID'] not in [39, 50]:
+                rating = single_rating(map_info['difficulty'], play_data['rate'], start_obj['lunaticMode'])
+            else:
+                rating = 0
             base_exp = rating
             skill_exp = (rating / 3) if play_data['endState'] >= 4 else 0
             skill_exp += (rating / 3) if play_data['endState'] >= 5 else 0
@@ -476,9 +481,11 @@ async def api_play_end(request: Request):
             if start_obj['playType'] == 13:
                 reward_list['darkmooncoin'] = reward_list.get('darkmooncoin', 0) + 1
                 cache_key = f"{darkmoon_object['season']}_{is_multi}"
-            else:
+            elif start_obj['packID'] not in [39, 50]:
                 reward_list['darkmatter'] += reward_list.get('darkmatter', 0) + 1
                 reward_list['energy.green'] += reward_list.get('energy.green', 0) + random.randint(100, 200)
+                cache_key = f"{start_obj['mapID']}"
+            else:
                 cache_key = f"{start_obj['mapID']}"
 
             # nullify leaderboard cache

@@ -66,6 +66,9 @@ darkmoonAstralBoosts = data.get("darkmoonAstralBoosts", [])
 with open('config/darkmoonAstralBoosts.json', 'w', encoding='utf-8') as f:
     f.write(json.dumps(darkmoonAstralBoosts))
 
+print("localiazation file name: ", data.get("localizationEntryFilename", "NOT EXIST"))
+print("pack icon atlas file name: ", data.get("packIconAtlasFilename", "NOT EXIST"))
+
 #-------------------
 
 from dateutil.parser import parse
@@ -192,7 +195,9 @@ class Track(ManifestBase):
     collaboration = Column(Integer)
     original = Column(Integer)
     duration = Column(String)
-    bpm = Column(Integer)
+    youtubeId = Column(String)
+    minBPM = Column(Integer)
+    maxBPM = Column(Integer)
     createdAt = Column(DateTime)
     updatedAt = Column(DateTime)
     trackItemKey = Column(String)
@@ -208,6 +213,7 @@ class Map(ManifestBase):
     mapFileName = Column(String)
     isSpeedChange = Column(Integer)
     isDarkmoonChart = Column(Integer)
+    noteCount = Column(Integer)
     createdAt = Column(DateTime)
     updatedAt = Column(DateTime)
     mapItemKey = Column(String)
@@ -917,6 +923,7 @@ class User(PlayerBase):
     isLocal = Column(Integer)
     isGoogle = Column(Integer)
     isGamecenter = Column(Integer)
+    cosmicSymphonyStoryIndex = Column(Integer)
     state = Column(Integer)
     email = Column(String)
     emailCode = Column(String)
@@ -1566,35 +1573,43 @@ def diff(db_item, diff_item, keys, item, table_name, json_keys=[], time_keys=[])
     for key in keys:
         old_val = getattr(db_item, key, None)
         new_val = item.get(key, None)
+        
+        # 1. Determine the 'target' value (checking for diffBase overrides)
         if diff_item and key in diff_item:
             new_val_diff = diff_item[key]
-            if new_val_diff not in [None, new_val]:
+            if new_val_diff not in [None, "None", new_val]:
                 new_val = new_val_diff
                 print(f"Applying diff for {table_name} pk={item['pk']} key={key}: {new_val}")
             elif new_val_diff == "None":
                 new_val = None
                 print(f"Applying diff for {table_name} pk={item['pk']} key={key}: {new_val}")
 
+        # 2. Compare and Apply
         if key in json_keys:
-            old_val = json.dumps(old_val, sort_keys=True)
-            new_val = json.dumps(new_val, sort_keys=True)
-            if old_val != new_val:
-                setattr(db_item, key, minify_json_field(new_val))
+            # Note: old_val/new_val are transformed for comparison
+            comp_old = json.dumps(old_val, sort_keys=True)
+            comp_new = json.dumps(new_val, sort_keys=True)
+            if comp_old != comp_new:
+                # Use the processed new_val
+                setattr(db_item, key, new_val) 
                 changed = True
 
         elif key in time_keys:
-            old_val = normalize_dt(old_val)
-            new_val = normalize_dt(new_val)
-            if old_val != new_val:
-                setattr(db_item, key, item.get(key))
+            comp_old = normalize_dt(old_val)
+            comp_new = normalize_dt(new_val)
+            if comp_old != comp_new:
+                # FIX: Use new_val (the override), not item.get(key)
+                setattr(db_item, key, new_val)
                 changed = True
 
         else:
             if old_val != new_val:
-                setattr(db_item, key, item.get(key))
+                # FIX: Use new_val (the override), not item.get(key)
+                setattr(db_item, key, new_val)
                 changed = True
+                
     if changed:
-        print(f"Updated {table_name} pk={item['pk']}: {item}")
+        print(f"Updated {table_name} pk={item['pk']}")
 
 def minify_json_field(val):
     if val is None or val == "":
@@ -1696,7 +1711,7 @@ TABLES = [
     TableSpec(
         name='maps',
         model=Map,
-        keys=["mode", "difficulty", "state", "mapFileName", "isSpeedChange", "isDarkmoonChart", "createdAt", "updatedAt", "mapItemKey", "TrackPk"],
+        keys=["mode", "difficulty", "state", "mapFileName", "isSpeedChange", "isDarkmoonChart", "noteCount", "createdAt", "updatedAt", "mapItemKey", "TrackPk"],
         time_keys=["createdAt", "updatedAt"]
     ),
     TableSpec(
@@ -2021,7 +2036,7 @@ TABLES = [
     TableSpec(
         name='tracks',
         model=Track,
-        keys=["title", "category", "stageNum", "state", "coverFileName", "blurredCoverFileName", "thumbnailFileName", "audioFileName", "audioPreviewFileName", "midiFileName", "hasModeFive", "hasModeSix", "hasModeSeven", "new", "hot", "beginners", "aggressive", "energetic", "acoustic", "pop", "majestic", "dreamy", "comics", "bms", "classics", "collaboration", "original", "duration", "bpm", "createdAt", "updatedAt", "trackItemKey", "PackPk", "ArtistPk"],
+        keys=["title", "category", "stageNum", "state", "coverFileName", "blurredCoverFileName", "thumbnailFileName", "audioFileName", "audioPreviewFileName", "midiFileName", "hasModeFive", "hasModeSix", "hasModeSeven", "new", "hot", "beginners", "aggressive", "energetic", "acoustic", "pop", "majestic", "dreamy", "comics", "bms", "classics", "collaboration", "original", "duration", "youtubeId", "minBPM", "maxBPM", "createdAt", "updatedAt", "trackItemKey", "PackPk", "ArtistPk"],
         time_keys=["createdAt", "updatedAt"],
         preprocess=tracks_preprocess
     ),

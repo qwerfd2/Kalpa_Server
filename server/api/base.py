@@ -17,7 +17,8 @@ async def api_friend(request: Request):
             "friends": await get_user_friends(user['pk']),
             "recommendUserProfiles": []
         }
-
+    
+    response_data = convert_datetime(response_data)
     return JSONResponse(response_data)
 
 async def api_notice(request: Request):
@@ -30,7 +31,8 @@ async def api_notice(request: Request):
     response_data['data'] = {
             "notices": NOTICE
         }
-
+    
+    response_data = convert_datetime(response_data)
     return JSONResponse(response_data)
 
 async def api_initial_info(request: Request):
@@ -51,6 +53,7 @@ async def api_initial_info(request: Request):
     response_data, completed_ach = await get_standard_response(user, user_profile)
     response_data['message'] = "Success."
     response_data['data'] = b64_string
+    response_data = convert_datetime(response_data)
 
     response = JSONResponse(response_data)
     response.headers["Content-Type"] = "application/json; charset=utf-8"
@@ -91,7 +94,6 @@ async def api_astral_melody(request: Request):
     }
 
     response_data = convert_datetime(response_data)
-
     return JSONResponse(response_data)
 
 async def api_mailbox(request: Request):
@@ -105,6 +107,7 @@ async def api_mailbox(request: Request):
             "userMailBoxes": await get_user_mailboxes(user['pk'])
         }
 
+    response_data = convert_datetime(response_data)
     return JSONResponse(response_data)
 
 async def api_refresh_user_data(request: Request):
@@ -220,7 +223,6 @@ async def api_album(request: Request):
         }
     
     response_data = convert_datetime(response_data)
-
     return JSONResponse(response_data)
 
 async def api_user_product(request: Request):
@@ -235,7 +237,6 @@ async def api_user_product(request: Request):
         }
     
     response_data = convert_datetime(response_data)
-
     return JSONResponse(response_data)
 
 async def api_mission(request: Request):
@@ -251,7 +252,6 @@ async def api_mission(request: Request):
         }
     
     response_data = convert_datetime(response_data)
-
     return JSONResponse(response_data)
 
 route = [
