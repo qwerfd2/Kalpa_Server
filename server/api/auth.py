@@ -150,7 +150,6 @@ async def auth_request_account(request: Request):
             "updatedUserItems": []
         }, status_code=400)
 
-
 route = [
     Route("/api/auth/signup", auth_signup, methods=["POST"]),
     Route("/api/auth/login", auth_login, methods=["POST"]),

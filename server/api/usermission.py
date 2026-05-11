@@ -15,10 +15,9 @@ async def receive_mission_reward(request: Request):
 
     mission_pk = int(request.path_params["mission_pk"])
     item_queue = {}
+    target_user_mission = None
 
     user_mission = await get_user_mission(user['pk'])
-
-    target_user_mission = None
 
     for mission in user_mission:
         if mission['MissionPk'] == mission_pk:
@@ -62,8 +61,8 @@ async def receive_mission_reward(request: Request):
     json_data, completed_ach = await get_standard_response(user, user_profile, item_list=item_queue)
     json_data['message'] = result
     json_data['data'] = data
-    json_data = convert_datetime(json_data)
 
+    json_data = convert_datetime(json_data)
     return JSONResponse(content=json_data, status_code=status)
 
 async def receive_all_rewards(request: Request):
@@ -104,8 +103,8 @@ async def receive_all_rewards(request: Request):
     json_data, completed_ach = await get_standard_response(user, user_profile, item_list=item_queue)
     json_data['message'] = result
     json_data['data'] = data
-    json_data = convert_datetime(json_data)
 
+    json_data = convert_datetime(json_data)
     return JSONResponse(content=json_data, status_code=status)
 
 async def mission_immediate_complete(request: Request):
@@ -176,8 +175,8 @@ async def mission_immediate_complete(request: Request):
     json_data, completed_ach = await get_standard_response(user, user_profile, item_list=item_queue)
     json_data['message'] = result
     json_data['data'] = data
-    json_data = convert_datetime(json_data)
 
+    json_data = convert_datetime(json_data)
     return JSONResponse(content=json_data, status_code=status)
 
 async def mission_attendence(request: Request):
@@ -203,8 +202,8 @@ async def mission_attendence(request: Request):
     json_data, completed_ach = await get_standard_response(user, user_profile, item_list=item_queue)
     json_data['message'] = message
     json_data['data'] = {}
-    json_data = convert_datetime(json_data)
 
+    json_data = convert_datetime(json_data)
     return JSONResponse(content=json_data, status_code=status)
 
 route = [

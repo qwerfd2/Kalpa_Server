@@ -43,7 +43,6 @@ async def lab_user_lab_mission(request: Request):
     }
 
     response_data = convert_datetime(response_data)
-
     return JSONResponse(response_data)
 
 async def lab_product_begin_research(request: Request):

@@ -150,7 +150,6 @@ async def get_ranking(request: Request):
         json_data['data'] = ""
 
     json_data = convert_datetime(json_data)
-
     return JSONResponse(json_data, status_code=200)
 
 async def album_ranking(request: Request):
@@ -269,7 +268,6 @@ async def darkmoon_ranking(request: Request):
             current_season = DARKMOON_MULTI[0]['season']
         else:
             current_season = DARKMOON_THUMB[0]['season']
-
 
         cache_key = f"{current_season}_{mode}"
         query = ranking_cache.select().where(ranking_cache.c.key == cache_key)

@@ -36,6 +36,7 @@ async def multiplay_room(request: Request):
         "rooms": room_list
     }
 
+    response_data = convert_datetime(response_data)
     return JSONResponse(response_data)
 
 async def api_multiplay_start(request: Request):

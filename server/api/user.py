@@ -47,7 +47,6 @@ async def user_email_verify_code(request: Request):
     }
 
     json_data = convert_datetime(json_data)
-
     return JSONResponse(json_data)
 
 async def user_email_send_code(request: Request):
@@ -154,7 +153,6 @@ async def user_profile_update_username(request: Request):
     json_data['data']['user'] = dict(user)
 
     json_data = convert_datetime(json_data)
-
     return JSONResponse(json_data, status_code=status)
 
 async def user_profile_me(request: Request):
@@ -184,7 +182,6 @@ async def user_profile_me(request: Request):
         }
 
     response_data = convert_datetime(response_data)
-
     return JSONResponse(response_data)
 
 async def user_profile_update(request: Request):
@@ -318,9 +315,7 @@ async def user_play_skin_update(request: Request):
     }
 
     json_data['message'] = "Success."
-
     json_data = convert_datetime(json_data)
-
     return JSONResponse(json_data)
 
 async def user_play_deco_update(request: Request):
@@ -345,7 +340,6 @@ async def user_play_deco_update(request: Request):
     new_deco = await player_database.fetch_one(new_query)
     new_deco = dict(new_deco) if new_deco else None
 
-
     json_data, completed_ach = await get_standard_response(user, user_profile)
 
     json_data['data'] = {
@@ -353,9 +347,7 @@ async def user_play_deco_update(request: Request):
     }
 
     json_data['message'] = "Success."
-
     json_data = convert_datetime(json_data)
-
     return JSONResponse(json_data)
 
 async def user_profile_public_range_change(request: Request):
@@ -398,7 +390,6 @@ async def user_favorite_add(request: Request):
     json_data['data'] = {}
 
     json_data = convert_datetime(json_data)
-
     return JSONResponse(json_data, status_code=200)
 
 async def user_favorite_remove(request: Request):
@@ -423,7 +414,6 @@ async def user_favorite_remove(request: Request):
     json_data['data'] = {}
 
     json_data = convert_datetime(json_data)
-
     return JSONResponse(json_data, status_code=200)
 
 async def user_password_reset(request: Request):
@@ -460,7 +450,6 @@ async def user_password_reset(request: Request):
     json_data['data'] = data
 
     json_data = convert_datetime(json_data)
-
     return JSONResponse(json_data, status_code=status)
 
 async def user_delete_account(request: Request):
@@ -525,12 +514,12 @@ async def public_user_profile(request: Request):
                 "characterKey": target_user['characterKey'],
                 "thumbAstralRating": target_user['thumbAstralRating'],
                 "multiAstralRating": target_user['multiAstralRating'],
-                "denyThumbRating": 0,
-                "denyMultiRating": 0,
-                "showThumbRating": 1,
-                "showMultiRating": 1,
-                "thumbAquaLevel": 0,
-                "multiAquaLevel": 0
+                "denyThumbRating": target_user['denyThumbRating'],
+                "denyMultiRating": target_user['denyMultiRating'],
+                "showThumbRating": target_user['showThumbRating'],
+                "showMultiRating": target_user['showMultiRating'],
+                "thumbAquaLevel": target_user['thumbAquaLevel'],
+                "multiAquaLevel": target_user['multiAquaLevel']
             },
             "darkAreaBestScores": {
                 "acc": 0,
@@ -549,7 +538,6 @@ async def public_user_profile(request: Request):
             response_data['data']['friendState'] = friend_state
 
     response_data = convert_datetime(response_data)
-
     return JSONResponse(response_data)
 
 route = [

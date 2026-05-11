@@ -50,7 +50,6 @@ def set_play_session_claimed(session_id):
             play_sessions[str(session_id)]['data']['rewardClaimed'] = True
             save_play_session()
 
-
 def delete_play_session(session_id):
     with lock:
         global play_sessions

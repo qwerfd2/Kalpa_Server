@@ -190,7 +190,7 @@ async def get_user_and_validate_session(request: Request):
     if not user_profile:
         return None, None, JSONResponse({"state": 0, "message": "User profile not found"}, status_code=400)
 
-    user_missions = await update_user_missions(user_pk)
+    _ = await update_user_missions(user_pk)
 
     return dict(user), dict(user_profile), None
 
@@ -216,9 +216,7 @@ async def generate_token():
     return token, token_id
 
 async def update_user_noah_chapters(user_pk: int, state: int, order: int, currents: list, noah_chhapter_pk: int):
-
     query = userNoahChapters.select().where((userNoahChapters.c.UserPk == user_pk) & (userNoahChapters.c.NoahChapterPk == noah_chhapter_pk))
-
     existing_chapter = await player_database.fetch_one(query)
 
     if not existing_chapter:

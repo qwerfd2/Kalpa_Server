@@ -390,7 +390,6 @@ async def refresh_user_rating(userPK, mode):
     else:
         mode_filter_list = [0, 1, 2, 6]
         is_thumb = True
-        
     
     query = (
         bestRecords.select()
@@ -460,8 +459,6 @@ async def get_character_skill(user_pk, track_id, user_character, is_start = Fals
             skill_obj['showSkillOnPopup'] = False
 
         return skill_obj, skill['conditionObj']
-
-    return None, None
 
 async def is_favorite_song(track_id, character_key):
     character_favor_query = characterFavoriteSongs.select().where(characterFavoriteSongs.c.rootCharacterKey == character_key)

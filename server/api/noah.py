@@ -84,7 +84,6 @@ async def noah_chapter_unlock(request: Request):
 
     response_data = convert_datetime(response_data)
     return JSONResponse(response_data, status_code=status)
-
     
 async def noah_part_complete(request: Request):
     user, user_profile, error = await get_user_and_validate_session(request)

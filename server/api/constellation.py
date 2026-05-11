@@ -23,7 +23,6 @@ async def character_skin_dress(request: Request):
         data = {}
     
     else:
-
         query = userConstellCharacters.select().where(
             (userConstellCharacters.c.ConstellCharacterPk == character_pk) &
             (userConstellCharacters.c.UserPk == user['pk'])
@@ -93,8 +92,6 @@ async def character_reverse(request: Request):
     )
     character_awaken_system = await manifest_database.fetch_one(character_awaken_system_query)
     character_awaken_system = dict(character_awaken_system) if character_awaken_system else None
-
-    
 
     if not user_constell_characters or not character_awaken_system:
         message = "Character not found."

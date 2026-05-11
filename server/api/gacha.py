@@ -102,7 +102,6 @@ async def gacha_draw_one(request: Request):
                 "selectedGachaItemInfo": drew_objects[0]
             }
 
-
     json_data, completed_ach = await get_standard_response(user, user_profile, item_list=item_queue)
     json_data["message"] = message
     json_data['data'] = data
@@ -171,7 +170,6 @@ async def gacha_draw_ten(request: Request):
                 "selectedGachaItemInfos": drew_objects
             }
 
-
     json_data, completed_ach = await get_standard_response(user, user_profile, item_list=item_queue)
     json_data["message"] = message
 
@@ -186,7 +184,6 @@ async def gacha_draw_ten(request: Request):
         data['newCharacterAwakens'] = await get_user_character_awakens(user['pk'])
 
     json_data['data'] = data
-
 
     json_data = convert_datetime(json_data)
     return JSONResponse(content=json_data, status_code=status)

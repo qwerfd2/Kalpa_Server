@@ -60,7 +60,6 @@ async def astral_rating_show(request: Request):
 
     new_user_query = userProfiles.select().where(userProfiles.c.pk == user['pk'])
     user_profile = await player_database.fetch_one(new_user_query)
-
     
     response_data['message'] = "Success."
     response_data['data'] = {
@@ -80,7 +79,6 @@ async def astral_rating_on(request: Request):
     query = userProfiles.update().where(userProfiles.c.pk == user['pk']).values(denyThumbRating=0, denyMultiRating=0)
     await player_database.execute(query)
 
-    
     response_data['message'] = "Success."
     response_data['data'] = {
 		"denyThumbRating": 0,

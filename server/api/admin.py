@@ -357,7 +357,6 @@ async def unlock_all_api(request: Request):
         user_pk = "all"
 
     return_json = await unlock_all_stuffs(user_pk, unlock_config)
-
     return JSONResponse(return_json)
 
 route = [

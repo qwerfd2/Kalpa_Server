@@ -1,5 +1,5 @@
 from starlette.applications import Starlette
-from starlette.responses import FileResponse, Response
+from starlette.staticfiles import StaticFiles
 from starlette.routing import Route
 import os
 
@@ -41,23 +41,17 @@ from api.album import route as album_routes
 from api.achievement import route as achievement_routes
 from api.admin import route as admin_routes
 
-root_folder = os.path.dirname(os.path.abspath(__file__))
+base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "files")
+static_app = StaticFiles(directory=base_dir)
 
-allowed_folders = [
-    "asset", "iconfiles", "eventbanner", "audfiles", "covfiles", "mapfiles", "web"
-]
+BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "files")
+static_engine = StaticFiles(directory=BASE_DIR)
+
+routes = []
 
 async def serve_file(request):
     path = request.path_params['path']
-    first_level_folder = path.split('/')[0]
-    if first_level_folder in allowed_folders:
-        file_path = os.path.realpath(os.path.join(os.getcwd(), "files", path))
-        if os.path.isfile(file_path):
-            return FileResponse(file_path)
-
-    return Response("File not found", status_code=404)
-
-routes = []
+    return await static_app.get_response(path, request.scope)
 
 routes = routes + user_routes + auth_routes + base_routes + darkmoon_routes + lab_routes + noah_routes + play_routes + performerlevel_routes + userpermission_routes + friend_routes + mailbox_routes + gacha_routes + buy_routes + constellation_routes + multiplay_routes + astralrating_routes + ranking_routes + album_routes + achievement_routes + admin_routes
 
@@ -67,21 +61,24 @@ if AUTH_MODE == 2:
 
 routes.append(Route("/{path:path}", serve_file))
 
-app = Starlette(debug=DEBUG, routes=routes)
+import contextlib
+from starlette.applications import Starlette
 
-@app.on_event("startup")
-async def startup():
+@contextlib.asynccontextmanager
+async def lifespan(app: Starlette):
     await player_database.connect()
     await manifest_database.connect()
     await init_db()
     await init_templates_database()
     await start_cleanup_task()
     await load_attendence_roster()
-
-@app.on_event("shutdown")
-async def shutdown():
+    
+    yield
+    
     await player_database.disconnect()
     await manifest_database.disconnect()
+
+app = Starlette(debug=DEBUG, routes=routes, lifespan=lifespan)
 
 if __name__ == "__main__":
     import uvicorn
