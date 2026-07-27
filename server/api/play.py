@@ -689,7 +689,7 @@ async def api_play_end(request: Request):
                 bonus_chance = 0
                 bonus_amount = 0
                 bonus_value_type = None
-
+ 
                 if start_obj['playType'] == 13:
                     # darkmoon bonuses
                     if skill_effect.get('darkmoon_bonus_money'):
@@ -792,58 +792,58 @@ async def api_play_end(request: Request):
                         reward_list[bonus_currency] = reward_list.get(bonus_currency, 0) + final_bonus_amount
                 #-----------
 
-                if start_obj['playType'] == 13:
-                    is_exp = False
+            if start_obj['playType'] == 13:
+                is_exp = False
 
-                if is_exp:
-                    data['isExp'] = True
+            if is_exp:
+                data['isExp'] = True
 
-                    is_character_favorite = await is_favorite_song(start_obj['trackID'], character_awaken_system['rootCharacterKey'])
+                is_character_favorite = await is_favorite_song(start_obj['trackID'], character_awaken_system['rootCharacterKey'])
 
-                    user_character_awaken_query = userCharacterAwakens.select().where(
-                        (userCharacterAwakens.c.UserPk == user['pk']) & (userCharacterAwakens.c.CharacterAwakenPk == character_awaken_system['pk'])
-                    )
-                    user_character_awaken = await player_database.fetch_one(user_character_awaken_query)
-                    user_character_awaken = dict(user_character_awaken) if user_character_awaken else None  
+                user_character_awaken_query = userCharacterAwakens.select().where(
+                    (userCharacterAwakens.c.UserPk == user['pk']) & (userCharacterAwakens.c.CharacterAwakenPk == character_awaken_system['pk'])
+                )
+                user_character_awaken = await player_database.fetch_one(user_character_awaken_query)
+                user_character_awaken = dict(user_character_awaken) if user_character_awaken else None  
 
-                    character_level_system_query = characterLevelSystems.select().where(
-                        characterLevelSystems.c.pk == character_awaken_system['CharacterLevelSystemPk']
-                    )
-                    character_level_system = await manifest_database.fetch_one(character_level_system_query)
-                    character_level_system = dict(character_level_system) if character_level_system else None
+                character_level_system_query = characterLevelSystems.select().where(
+                    characterLevelSystems.c.pk == character_awaken_system['CharacterLevelSystemPk']
+                )
+                character_level_system = await manifest_database.fetch_one(character_level_system_query)
+                character_level_system = dict(character_level_system) if character_level_system else None
 
-                    exp_required = character_level_system['levelExps' + str(user_constell_character['currentReverse'])][len(character_level_system['levelExps' + str(user_constell_character['currentReverse'])]) - 1]
+                exp_required = character_level_system['levelExps' + str(user_constell_character['currentReverse'])][len(character_level_system['levelExps' + str(user_constell_character['currentReverse'])]) - 1]
 
-                    character_exp = user_character_awaken['currentExp' + str(user_constell_character['currentReverse'])] if user_character_awaken else 0
+                character_exp = user_character_awaken['currentExp' + str(user_constell_character['currentReverse'])] if user_character_awaken else 0
 
-                    favor_exp = rating if is_character_favorite else 0
+                favor_exp = rating if is_character_favorite else 0
 
-                    total_exp = min(int((base_exp + favor_exp + skill_exp + character_exp) * astral_boost_config['playEXPMultiplier']), exp_required)
+                total_exp = min(int((base_exp + favor_exp + skill_exp + character_exp) * astral_boost_config['playEXPMultiplier']), exp_required)
 
-                    query = userCharacterAwakens.update().where(
-                        (userCharacterAwakens.c.UserPk == user['pk']) & (userCharacterAwakens.c.CharacterAwakenPk == character_awaken_system['pk'])
-                    ).values(
-                        **{f'currentExp{user_constell_character["currentReverse"]}': total_exp},
-                        updatedAt = datetime.utcnow()
-                    )
-                    await player_database.execute(query)
+                query = userCharacterAwakens.update().where(
+                    (userCharacterAwakens.c.UserPk == user['pk']) & (userCharacterAwakens.c.CharacterAwakenPk == character_awaken_system['pk'])
+                ).values(
+                    **{f'currentExp{user_constell_character["currentReverse"]}': total_exp},
+                    updatedAt = datetime.utcnow()
+                )
+                await player_database.execute(query)
 
-                    user_character_awaken_query = userCharacterAwakens.select().where(
-                        (userCharacterAwakens.c.UserPk == user['pk']) & (userCharacterAwakens.c.CharacterAwakenPk == character_awaken_system['pk'])
-                    )
-                    user_character_awaken = await player_database.fetch_one(user_character_awaken_query)
-                    user_character_awaken = dict(user_character_awaken) if user_character_awaken else None
+                user_character_awaken_query = userCharacterAwakens.select().where(
+                    (userCharacterAwakens.c.UserPk == user['pk']) & (userCharacterAwakens.c.CharacterAwakenPk == character_awaken_system['pk'])
+                )
+                user_character_awaken = await player_database.fetch_one(user_character_awaken_query)
+                user_character_awaken = dict(user_character_awaken) if user_character_awaken else None
 
-                    data['exp'] = {
-                        "userCharacterAwaken": user_character_awaken,
-                        "default": base_exp,
-                        "rankBonus": 0,
-                        "skillBonus": skill_exp,
-                        "favoriteBonus": favor_exp,
-                        "systemBonus": 0,
-                        "serverEventBonus": 0,
-                        "astralBoostBonus": 0
-                    }
+                data['exp'] = {
+                    "userCharacterAwaken": user_character_awaken,
+                    "default": base_exp,
+                    "rankBonus": 0,
+                    "skillBonus": skill_exp,
+                    "favoriteBonus": favor_exp,
+                    "systemBonus": 0,
+                    "serverEventBonus": 0,
+                    "astralBoostBonus": 0
+                }
 
             if start_obj['playType'] == 7:
                 # noah story play, do increment stuff. First, stage state to 4

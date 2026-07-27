@@ -106,6 +106,7 @@ async def user_email_send_code(request: Request):
     json_data['message'] = message
     json_data['data'] = data
 
+    json_data = convert_datetime(json_data)
     return JSONResponse(json_data, status_code=status)
 
 async def user_profile_update_username(request: Request):
@@ -268,6 +269,7 @@ async def user_profile_update(request: Request):
     json_data['message'] = message
     json_data['data'] = data
 
+    json_data = convert_datetime(json_data)
     return JSONResponse(json_data, status_code=status)
 
 async def user_play_skin_update(request: Request):
@@ -364,6 +366,7 @@ async def user_profile_public_range_change(request: Request):
     json_data, completed_ach = await get_standard_response(user, user_profile)
     json_data['message'] = "Success."
     json_data['data'] = {}
+    json_data = convert_datetime(json_data)
 
     return JSONResponse(json_data, status_code=200)
 
@@ -483,7 +486,7 @@ async def user_item_count_get(request: Request):
         json_data = {
             "itemCount": item_count
         }
-
+    json_data = convert_datetime(json_data)
     return JSONResponse(json_data, status_code=200)
 
 async def public_user_profile(request: Request):

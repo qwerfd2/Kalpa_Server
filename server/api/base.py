@@ -1,6 +1,7 @@
 from starlette.responses import JSONResponse
 from starlette.requests import Request
 from starlette.routing import Route
+import copy
 
 from api.database import player_database, userConstellCharacters, get_user_and_validate_session, get_user_item, get_user_mailboxes, get_user_products, get_lab_products, get_noah_chapters, get_noah_parts, get_noah_stages, get_user_noah_chapters, get_user_noah_parts, get_user_noah_stages, get_user_lab_products, get_lab_missions, get_user_lab_missions, get_user_albums, user_has_valid_membership, get_user_friends
 from api.templates_norm import NOTICE
@@ -25,11 +26,29 @@ async def api_notice(request: Request):
     user, user_profile, error = await get_user_and_validate_session(request)
     if error:
         return error
+
+    lang = request.headers.get("Accept-Language", None)
+    lang_list = ['jp', 'ko', 'zh-chs', 'zh-cht']
+    lang_list_text = ['en', 'jp', 'ko', 'zh-chs', 'zh-cht']
+    if lang not in lang_list:
+        lang = 'en'
+
+    notices = copy.deepcopy(NOTICE)
+
+    for notice in notices:
+        notice['title'] = notice["title_" + lang]
+        notice['textContent'] = notice["textContent_" + lang]
+        notice['fileName'] = notice["fileName_" + lang]
+        for langs in lang_list:
+            del notice['title_' + langs]
+        for langs in lang_list_text:
+            del notice['textContent_' + langs]
+            del notice['fileName_' + langs]
     
     response_data, completed_ach = await get_standard_response(user, user_profile)
     response_data['message'] = "Success."
     response_data['data'] = {
-            "notices": NOTICE
+            "notices": notices
         }
     
     response_data = convert_datetime(response_data)

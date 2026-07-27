@@ -179,6 +179,8 @@ async def mission_immediate_complete(request: Request):
     json_data = convert_datetime(json_data)
     return JSONResponse(content=json_data, status_code=status)
 
+## ISSUE: Can claim repeatedly
+
 async def mission_attendence(request: Request):
     user, user_profile, error = await get_user_and_validate_session(request)
     if error:
@@ -189,6 +191,9 @@ async def mission_attendence(request: Request):
     membership_status = await user_has_valid_membership(user['pk'], 1)
     if not membership_status:
         message = "User does not have a valid Cosmic Membership."
+        status = 400
+    elif str(user['pk']) in cache.ATTENDENCE_ROSTER:
+        message = "User has already claimed today's attendence."
         status = 400
     else:
         key = METADATA.get("cosmicMembershipAttendanceRewardKey", "fragment")

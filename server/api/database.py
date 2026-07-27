@@ -1066,17 +1066,17 @@ async def set_user_item(userPK, itemKey, amount, start_date=None, end_date=None)
     latest_item = await player_database.fetch_one(latest_query)
 
     user_item = {
-			"pk": latest_item['pk'],
-            "amount": latest_item['amount'],
-            "renewedDate": latest_item['renewedDate'],
-            "state": latest_item['state'],
-            "startDate": start_date,
-			"endDate": end_date,
-            "createdAt": latest_item['startDate'],
-			"updatedAt": datetime.utcnow().isoformat() + "Z",
-            "UserPk": latest_item['UserPk'],
-			"ItemPk": latest_item['ItemPk']
-		}
+        "pk": latest_item['pk'],
+        "amount": latest_item['amount'],
+        "renewedDate": latest_item['renewedDate'],
+        "state": latest_item['state'],
+        "startDate": start_date,
+        "endDate": end_date,
+        "createdAt": latest_item['startDate'],
+        "updatedAt": datetime.utcnow().isoformat() + "Z",
+        "UserPk": latest_item['UserPk'],
+        "ItemPk": latest_item['ItemPk']
+    }
 
     return_object = {
 		"userItem": user_item,
