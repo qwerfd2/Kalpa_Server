@@ -4,7 +4,7 @@ from starlette.routing import Route
 import random
 from datetime import datetime
 
-from api.database import manifest_database, player_database, playRecords, bestRecords, userConstellCharacters, performerHurdleMissions, userPerformerHurdleMissions, userNoahStages, noahStages, userDarkmoon, userDarkmoonRankings, characterAwakens, characterLevelSystems, userCharacterAwakens, userNoahParts, userNoahChapters, ranking_cache, cache_database, userPublicProfiles, tracks, labMissions, userLabMissions, labProducts, userProfiles, get_user_and_validate_session, check_mission, get_user_performer_hurdle_missions, check_item_entitlement, increment_user_lab_mission, get_map, update_user_public_profile, get_user_sum_score_for_mode, get_user_achieved_list, set_user_item
+from api.database import manifest_database, player_database, playRecords, bestRecords, userConstellCharacters, performerHurdleMissions, userPerformerHurdleMissions, userNoahStages, noahStages, userDarkmoon, userDarkmoonRankings, characterAwakens, characterLevelSystems, userCharacterAwakens, userNoahParts, userNoahChapters, ranking_cache, cache_database, userPublicProfiles, users, labMissions, userLabMissions, labProducts, userProfiles, get_user_and_validate_session, check_mission, get_user_performer_hurdle_missions, check_item_entitlement, increment_user_lab_mission, get_map, update_user_public_profile, get_user_sum_score_for_mode, get_user_achieved_list, set_user_item
 from api.templates_norm import PLAY_PUBLIC_KEY, DARKMOON_BOOST_CONFIG, DIFF_TABLE
 from api.misc import convert_datetime, get_standard_response, generate_object_id, is_multi_mode, single_rating, refresh_user_rating, get_next_stage, get_character_skill, is_favorite_song
 from api.noah import sync_user_noah_chapter, get_user_noah_stages, update_user_noah_stages
@@ -123,6 +123,7 @@ async def api_play_start(request: Request):
     event_type = int(request_post.get('eventType'))
     event_pk = int(request_post.get('eventPk'))
     astral_boost_step = int(request_post.get('astralBoostStep'))
+    story_index = int(request_post.get('cosmicSymphonyStoryIndex', 0))
 
     item_queue = {}
 
@@ -210,8 +211,33 @@ async def api_play_start(request: Request):
                     json_data['data'] = {}
                     return JSONResponse(json_data, status_code=400)
 
-    data = await start_game(user_profile, play_type, mode, note_mode, play_mode, lunatic_mode, pack_id, track_id, map_id, event_type, event_pk, astral_boost_step, user)
+    user_existing_index = user["cosmicSymphonyStoryIndex"]
+    item_queue_test = {}
+    item_queue_test['pack.cosmicsymphony'] = 1
+    item_queue_test['pack.cosmicsymphony2'] = 1
+    can_view_for_free = await check_item_entitlement(user['pk'], item_queue_test)
+    user_has_enough = False
 
+    if story_index:
+        if not can_view_for_free:
+            item_queue['astralmelody'] = item_queue.get("astralmelody", 0) - 60
+            item_queue_test = {}
+            item_queue_test['astralmelody'] = item_queue['astralmelody']
+            user_has_enough = await check_item_entitlement(user['pk'], item_queue_test)
+
+        if can_view_for_free or user_has_enough:
+            save_index = story_index if user_existing_index < story_index else user_existing_index
+            if save_index != user_existing_index:
+                query = users.update().where(users.c.pk == user['pk']).values(cosmicSymphonyStoryIndex=save_index)
+                await player_database.execute(query)
+            
+        else:
+            save_index = user_existing_index
+    else:
+        save_index = user_existing_index
+
+    data = await start_game(user_profile, play_type, mode, note_mode, play_mode, lunatic_mode, pack_id, track_id, map_id, event_type, event_pk, astral_boost_step, user)
+    data['cosmicSymphonyStoryIndex'] = save_index
     status = 200
     json_data, completed_ach = await get_standard_response(user, user_profile, item_list=item_queue)
     json_data['message'] = "Success."
@@ -229,6 +255,7 @@ async def api_play_end(request: Request):
     from api.templates_norm import DARKMOON_MULTI, DARKMOON_THUMB
     request_post = await request.form()
     play_data = await play_decrypt(request_post)
+    print(play_data)
 
     user_thumb = user_profile['thumbAstralRating'] if user_profile else 0
     user_multi = user_profile['multiAstralRating'] if user_profile else 0

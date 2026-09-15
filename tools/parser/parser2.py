@@ -93,7 +93,6 @@ def create_diff_models():
             "delete": Column(Integer),
         }
 
-        # clone columns
         for col in table.columns:
             attrs[col.name] = Column(
                 col.type,
@@ -1036,7 +1035,7 @@ class UserMission(PlayerBase):
     state = Column(Integer)
     periodType = Column(Integer)
     current = Column(Integer)
-    expireDate = Column(Integer)  # unix timestamp
+    expireDate = Column(Integer)
     MissionPk = Column(Integer)
     UserPk = Column(Integer, ForeignKey('users.pk'))
     remainingTime = Column(Integer)
@@ -1295,7 +1294,6 @@ class UserAchievement(PlayerBase):
     category = Column(Integer)
     UserPk = Column(Integer, ForeignKey('users.pk'))
     AchievementPk = Column(Integer)
-    # Indexes and constraints
     __table_args__ = (
         Index('idx_userAchievement_user', 'UserPk'),
         Index('idx_userAchievement_achievement', 'AchievementPk'),
@@ -1534,6 +1532,18 @@ class userDarkmoonRanking(PlayerBase):
     updatedAt = Column(DateTime)
     UserPk = Column(Integer, ForeignKey('users.pk'))
 
+class userHotDeals(PlayerBase):
+    __tablename__ = 'userHotDeals'
+    pk = Column(Integer, primary_key=True, autoincrement=True)
+    hotDealKey = Column(String)
+    triggerType = Column(Integer)
+    roundId = Column(Integer)
+    productKeys = Column(JSON)
+    discountPercentage = Column(Integer)
+    startDate = Column(DateTime)
+    endDate = Column(DateTime)
+    buyCount = Column(Integer)
+
 class binds(PlayerBase):
     __tablename__ = 'binds'
     pk = Column(Integer, primary_key=True, autoincrement=True)
@@ -1574,7 +1584,6 @@ def diff(db_item, diff_item, keys, item, table_name, json_keys=[], time_keys=[])
         old_val = getattr(db_item, key, None)
         new_val = item.get(key, None)
         
-        # 1. Determine the 'target' value (checking for diffBase overrides)
         if diff_item and key in diff_item:
             new_val_diff = diff_item[key]
             if new_val_diff not in [None, "None", new_val]:
@@ -1584,13 +1593,10 @@ def diff(db_item, diff_item, keys, item, table_name, json_keys=[], time_keys=[])
                 new_val = None
                 print(f"Applying diff for {table_name} pk={item['pk']} key={key}: {new_val}")
 
-        # 2. Compare and Apply
         if key in json_keys:
-            # Note: old_val/new_val are transformed for comparison
             comp_old = json.dumps(old_val, sort_keys=True)
             comp_new = json.dumps(new_val, sort_keys=True)
             if comp_old != comp_new:
-                # Use the processed new_val
                 setattr(db_item, key, new_val) 
                 changed = True
 
@@ -1598,13 +1604,11 @@ def diff(db_item, diff_item, keys, item, table_name, json_keys=[], time_keys=[])
             comp_old = normalize_dt(old_val)
             comp_new = normalize_dt(new_val)
             if comp_old != comp_new:
-                # FIX: Use new_val (the override), not item.get(key)
                 setattr(db_item, key, new_val)
                 changed = True
 
         else:
             if old_val != new_val:
-                # FIX: Use new_val (the override), not item.get(key)
                 setattr(db_item, key, new_val)
                 changed = True
                 
@@ -1629,7 +1633,6 @@ def prepare_data(data, time_keys=[], json_keys=[]):
         elif val is None:
             data[dt_field] = None
 
-    # Minify JSON fields
     for json_field in json_keys:
         data[json_field] = minify_json_field(data.get(json_field, []))
 

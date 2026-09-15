@@ -6,11 +6,9 @@ import random
 from api.database import manifest_database, gachas, gachaItems, get_user_and_validate_session, get_user_gacha, check_item_entitlement, get_user_constella_characters, get_user_character_awakens
 from api.misc import get_standard_response, convert_datetime
 
-async def draw_item(user_pk, list, count, gacha_pk):
+async def draw_item(user_pk, gacha, list, count):
     result = []
     total_weight = sum(item['appearProportion'] for item in list)
-
-    key_string = "isStarBit"
 
     for _ in range(count):
         rand_value = random.uniform(0, total_weight)
@@ -31,12 +29,13 @@ async def draw_item(user_pk, list, count, gacha_pk):
 
     for obj in result:
         item_key = obj['key']
-        obj[key_string] = False
+        obj["isCurrency"] = False
+        obj["currencyName"] = gacha['starBitItemKey']
 
         if item_key not in ['astralmelody', 'energy.green', 'missionclearticket.daily', 'missionclearticket.weekly', 'darkmatter', 'fragment']:
             user_entitlement = await check_item_entitlement(user_pk, {item_key: -1})
             if user_entitlement:
-                obj[key_string] = True
+                obj["isCurrency"] = True
                 obj['value'] = obj['starAmount']
         
         del obj['starAmount']
@@ -83,17 +82,14 @@ async def gacha_draw_one(request: Request):
             status = 400
             data = {}
         else:
-            drew_objects = await draw_item(user['pk'], gacha_items, 1, gacha_pk)
+            drew_objects = await draw_item(user['pk'], gacha, gacha_items, 1)
             
             for obj in drew_objects:
-                if obj.get('isStarBit'):
-                    item_queue["starbit.default"] = item_queue.get("starbit.default", 0) + obj['value']
-                elif obj.get('isStarDust'):
-                    item_queue["stardust.default"] = item_queue.get("stardust.default", 0) + obj['value']
+                if obj.get('isCurrency'):
+                    starbit_item = obj.get('currencyName')
+                    item_queue[starbit_item] = item_queue.get(starbit_item, 0) + obj['value']
                 else:
                     item_queue[obj['key']] = item_queue.get(obj['key'], 0) + obj['value']
-                del obj['key']
-                del obj['value']
 
             message = "Success."
             status = 200
@@ -150,18 +146,14 @@ async def gacha_draw_ten(request: Request):
             status = 400
             data = {}
         else:
-            drew_objects = await draw_item(user['pk'], gacha_items, 10, gacha_pk)
+            drew_objects = await draw_item(user['pk'], gacha, gacha_items, 10)
 
             for obj in drew_objects:
-                if obj.get('isStarBit'):
-                    item_queue["starbit.default"] = item_queue.get("starbit.default", 0) + obj['value']
-                elif obj.get('isStarDust'):
-                    item_queue["stardust.default"] = item_queue.get("stardust.default", 0) + obj['value']
+                if obj.get('isCurrency'):
+                    starbit_item = obj.get('currencyName')
+                    item_queue[starbit_item] = item_queue.get(starbit_item, 0) + obj['value']
                 else:
                     item_queue[obj['key']] = item_queue.get(obj['key'], 0) + obj['value']
-
-                del obj['key']
-                del obj['value']
 
             message = "Success."
             status = 200
@@ -175,7 +167,7 @@ async def gacha_draw_ten(request: Request):
 
     root_character_trigger = False
     for obj in drew_objects:
-        if obj['gachaItemKey'].startswith("premium.rootcharacter.") and obj['isStarBit'] == False:
+        if obj['gachaItemKey'].startswith("premium.rootcharacter.") and obj['isCurrency'] == False:
             root_character_trigger = True
             break
 

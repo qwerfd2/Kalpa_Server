@@ -81,6 +81,7 @@ async def get_b64(userPK, user_profile):
         "allPlayerCoopPointGatheringEvents": ALL_PLAYER_COOP_POINT_GATHERING_EVENTS,
         "localizationEntries": LOCALIZATION_ENTRIES,
         "astralBoosts": ASTRAL_BOOSTS,
+        "userHotDeals": [],
         "darkmoonAstralBoosts": DARKMOON_ASTRAL_BOOSTS,
         "packIconAtlasFilename": PACK_ICON_ATLAS_FILENAME,
         "localizationEntryFilename": LOCALIZATION_ENTRY_FILENAME,

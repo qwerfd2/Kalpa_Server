@@ -39,6 +39,7 @@ from api.astralrating import route as astralrating_routes
 from api.ranking import route as ranking_routes
 from api.album import route as album_routes
 from api.achievement import route as achievement_routes
+from api.cosmicsymphonystory import route as story_routes
 from api.admin import route as admin_routes
 
 base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "files")
@@ -53,7 +54,7 @@ async def serve_file(request):
     path = request.path_params['path']
     return await static_app.get_response(path, request.scope)
 
-routes = routes + user_routes + auth_routes + base_routes + darkmoon_routes + lab_routes + noah_routes + play_routes + performerlevel_routes + userpermission_routes + friend_routes + mailbox_routes + gacha_routes + buy_routes + constellation_routes + multiplay_routes + astralrating_routes + ranking_routes + album_routes + achievement_routes + admin_routes
+routes = routes + user_routes + auth_routes + base_routes + darkmoon_routes + lab_routes + noah_routes + play_routes + performerlevel_routes + userpermission_routes + friend_routes + mailbox_routes + gacha_routes + buy_routes + constellation_routes + multiplay_routes + astralrating_routes + ranking_routes + album_routes + achievement_routes + story_routes + admin_routes
 
 if AUTH_MODE == 2:
     from api.discord_hook import routes as discord_routes

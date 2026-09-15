@@ -411,6 +411,9 @@ async def playInfo(sid, play_data):
     opponent_sid = room_data["opponent_sid"] if room_data["host_sid"] == sid else room_data["host_sid"]
     await sio.emit("playInfo", play_data, to=opponent_sid)
 
+# playFriendEnd: emit opponent play info to each other
+# playEnd: respond self play info to self
+
 @sio.event
 async def playEnd(sid, end_data):
     print(f"playEnd from {sid}: {end_data}")
@@ -486,6 +489,7 @@ async def setPlayCost(sid, cost):
 async def catch_all_events(sid, data):
     print(f"UNHANDLED EVENT from {sid}: {data}")
 
+# Define the main entry point
 if __name__ == "__main__":
     # Run the app
     save_rooms()

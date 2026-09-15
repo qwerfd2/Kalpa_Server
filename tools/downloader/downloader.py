@@ -4,14 +4,24 @@ import requests
 import base64
 import gzip
 import io
+import re
+
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 asset_dirs = [
-    "mapfiles", "asset/text", "audfiles",
-    "midifiles", "covfiles", "iconfiles", "eventbanner"
+    "mapfiles", "asset/text", "asset/bundle/kalpa_mobile/remote_v1/Android", "audfiles",
+    "midifiles", "covfiles", "iconfiles", "eventbanner", "notice"
 ]
 
 BASE_URL = "https://d1h9358u1aon5f.cloudfront.net/"
+
+FILE = "catalog.bin"
+with open(FILE, "rb") as f:
+    data = f.read()
+
+pattern = rb"pcstoryremote_[^/\x00\r\n]*?\.bundle"
+matches = re.findall(pattern, data)
+PC_ASSET_ANDROID = [m.decode("ascii") for m in matches]
 
 def ensure_dirs():
     for d in asset_dirs:
@@ -87,6 +97,11 @@ def main():
             if not os.path.exists(path):
                 tasks.append((f"{BASE_URL}eventbanner/{name}", path))
 
+    for file in PC_ASSET_ANDROID:
+        path = f"asset/bundle/kalpa_mobile/remote_v1/Android/{file}"
+        if not os.path.exists(path):
+            tasks.append((f"{BASE_URL}asset/bundle/kalpa_mobile/remote_v1/Android/{file}", path))
+
     # Misc
     if data.get("packIconAtlasFilename"):
         name = data["packIconAtlasFilename"]
@@ -101,7 +116,7 @@ def main():
             tasks.append((f"{BASE_URL}asset/text/{name}", path))
 
     print(f"Starting {len(tasks)} downloads...")
-    run_downloads(tasks, max_workers=12)
+    run_downloads(tasks, max_workers=8)
 
 if __name__ == "__main__":
     main()

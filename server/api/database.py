@@ -1,16 +1,12 @@
 from starlette.requests import Request
+from starlette.responses import JSONResponse
 
 import sqlalchemy
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy import Table, Column, Integer, String, JSON
 from sqlalchemy.future import select
-
-import copy
-
 from itertools import groupby
 from operator import itemgetter
-
-from starlette.responses import JSONResponse
 
 import os
 from datetime import datetime, timedelta
@@ -19,6 +15,7 @@ import hashlib
 import time
 import uuid
 import random
+import copy
 
 from api.crypt import hash_password, verify_password
 from api.templates_norm import INIT_ITEMS, INIT_NOAH_PARTS, INIT_NOAH_STAGES, USER_PROFILE_LOOKUP_TABLE
@@ -181,7 +178,6 @@ async def get_user_and_validate_session(request: Request):
         return None, None, JSONResponse({"state": 0, "message": "Session not found"}, status_code=400)
 
     user_pk = session["did"]
-
     user = await get_user(user_pk)
     if not user:
         return None, None, JSONResponse({"state": 0, "message": "user not found"}, status_code=400)
@@ -508,11 +504,9 @@ async def init_user_darkmoon(user_pk: int):
     exclude_map_multi = DARKMOON_MULTI[0]['specialRewardItems'][0]['key']
 
     existing_thumb = await player_database.fetch_one(query=userDarkmoon.select().where((userDarkmoon.c.UserPk == user_pk) & (userDarkmoon.c.DarkmoonPk == thumb_pk) & (userDarkmoon.c.isThumb == 1)))
-
     existing_multi = await player_database.fetch_one(query=userDarkmoon.select().where((userDarkmoon.c.UserPk == user_pk) & (userDarkmoon.c.DarkmoonPk == multi_pk) & (userDarkmoon.c.isThumb == 0)))
 
     existing_ranking_thumb = await player_database.fetch_one(query=userDarkmoonRankings.select().where((userDarkmoonRankings.c.UserPk == user_pk) & (userDarkmoonRankings.c.season == thumb_season) & (userDarkmoonRankings.c.mode == 0)))
-
     existing_ranking_multi = await player_database.fetch_one(query=userDarkmoonRankings.select().where((userDarkmoonRankings.c.UserPk == user_pk) & (userDarkmoonRankings.c.season == multi_season) & (userDarkmoonRankings.c.mode == 1)))
 
     if not existing_thumb:
@@ -1526,8 +1520,8 @@ async def increment_user_lab_mission(user_pk, mission_key):
 
     mission_category_0 = lab_mission['category0']
     mission_category_1 = lab_mission['category1']
-    mission_goal_0 = lab_mission['goal0']
-    mission_goal_1 = lab_mission['goal1']
+    mission_goal_0 = lab_mission['goal0'] if lab_mission['category0'] != 0 else 0
+    mission_goal_1 = lab_mission['goal1'] if lab_mission['category1'] != 0 else 0
 
     if (mission_category_0 == 1 and mission_key == "daily_mission") or (mission_category_0 == 2 and mission_key == "weekly_mission") or (mission_category_0 == 3 and mission_key == "free_play"):
         result = await increment_lab_mission(user_pk, lab_mission['pk'], 0, mission_goal_0, mission_goal_1)
